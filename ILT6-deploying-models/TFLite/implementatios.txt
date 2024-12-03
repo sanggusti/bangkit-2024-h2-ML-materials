@@ -1,0 +1,30 @@
+// Step 1: Create TFLite's TensorImage object
+ 
+        val imageProcessor = ImageProcessor.Builder()
+            .add(ResizeOp(300, 300, ResizeOp.ResizeMethod.BILINEAR))
+            .add(NormalizeOp(0f, 1f))
+            .build()
+ 
+        var tensorImage = TensorImage(DataType.FLOAT32)
+        tensorImage.load(bitmap)
+ 
+        tensorImage = imageProcessor.process(tensorImage)
+ 
+        // Step 2: Initialize the detector object
+ 
+        val baseOptions = BaseOptions.builder().useNnapi().build()
+ 
+        val options = ObjectDetector.ObjectDetectorOptions.builder()
+            .setBaseOptions(baseOptions)
+            .setMaxResults(5)
+            .setScoreThreshold(0.7f)
+            .build()
+ 
+        val detector = ObjectDetector.createFromFileAndOptions(
+            context,
+            "final_model_metadata_v4.tflite",
+            options
+        )
+ 
+        // Step 3: Feed given image to the detector
+        val results = detector.detect(tensorImage)
